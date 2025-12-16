@@ -1,6 +1,6 @@
-export const apiService = (baseUrl = '', getToken) => {
+export const apiService = (baseUrl = '', getToken, convert = false) => {
 
-const getAuthHeaders = async () => {
+  const getAuthHeaders = async () => {
     if (!getToken) return {};
     
     const token = await getToken();
@@ -22,13 +22,16 @@ const getAuthHeaders = async () => {
       data = snakeToCamel(data);
 
       if (!response.ok) {
-        return { success: false, error: data?.detail || 'Request failed' };
+        throw data?.detail || 'Request failed';
       }
       console.log('Запрос завершен, ', fullUrl)
       return { success: true, data };
     } catch (error) {
-      console.log('Ошибка запроса, ', fullUrl)
-      return { success: false, error: 'Ошибка сети' };
+      console.log(error)
+      const normalizedError = normalizeError(error);
+      console.log('Ошибка запроса, ', fullUrl, normalizedError)
+      // return { success: false, error: 'Ошибка сети' };
+      throw normalizedError;
     }
   };
 
@@ -36,14 +39,15 @@ const getAuthHeaders = async () => {
     return request(url);
   };
 
-  const post = (url, body, convert = false) => {
+  const post = (url, body) => {
+    console.log(convert)
     return request(url, {
       method: 'POST',
       body: JSON.stringify(convert ? camelToSnake(body) : body),
     });
   };
 
-  const put = (url, body, convert = false) => {
+  const put = (url, body) => {
     return request(url, {
       method: 'PUT',
       body: JSON.stringify(convert ? camelToSnake(body) : body),
@@ -77,7 +81,6 @@ const snakeToCamel = (obj) => {
 const camelToSnake = (obj) => {
   if (obj === undefined || obj === null) return obj;
 
-  const oldObj = obj;
   if (Array.isArray(obj)) {
     return obj.map(v => camelToSnake(v));
   } else if (obj.constructor === Object) {
@@ -89,3 +92,20 @@ const camelToSnake = (obj) => {
   }
   return obj;
 };
+
+const normalizeError = (error) => {
+  // Создаем стандартный объект ошибки
+  const normalized = {
+    message: '',
+  };
+  
+  if (error.response) {
+    normalized.message = error.response.data?.message || `Ошибка ${error.response.status}`;
+  } else if (error.request) {
+    normalized.message = 'Нет ответа от сервера';
+  } else {
+    normalized.message = error || 'Неизвестная ошибка';
+  }
+  
+  return normalized;
+}

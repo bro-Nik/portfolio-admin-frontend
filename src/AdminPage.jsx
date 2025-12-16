@@ -19,13 +19,14 @@ import {
   ApiOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '/app/src/stores/authStore';
+import ExternalApiPage from '/app/src/modules/externalApi/ExternalApiPage';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
 const AdminPage = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState('tasks');
+  const [selectedMenu, setSelectedMenu] = useState('api-services');
   const { user, logout } = useAuthStore();
 
   const sidebarMenu = [
@@ -62,7 +63,13 @@ const AdminPage = () => {
   ];
 
   const renderContent = () => {
-    return '';
+    switch (selectedMenu) {
+      case 'api-services':
+        return <ExternalApiPage />;
+
+      default:
+        return <ExternalApiPage />;
+    }
   };
 
   return (
