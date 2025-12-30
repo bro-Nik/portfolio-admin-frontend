@@ -18,21 +18,21 @@ const { TabPane } = Tabs;
 
 const StatsModal = ({
   visible,
-  selectedService,
-  serviceStats,
-  serviceLogs,
+  selectedProvider,
+  providerStats,
+  providerLogs,
   onClose,
   onResetCounters
 }) => {
 
-  if (!selectedService || !serviceStats) return null;
+  if (!selectedProvider || !providerStats) return null;
 
   return (
     <Modal
       title={
         <Space>
           <ApiOutlined />
-          <span>Статистика API сервиса: {selectedService.name}</span>
+          <span>Статистика API провайдера: {selectedProvider.name}</span>
         </Space>
       }
       open={visible}
@@ -47,7 +47,7 @@ const StatsModal = ({
               <Card size="small">
                 <Statistic
                   title="Запросов сегодня"
-                  value={serviceStats.requests_today}
+                  value={providerStats.requestsToday}
                   prefix={<ThunderboltOutlined />}
                   valueStyle={{ color: '#1890ff' }}
                 />
@@ -57,7 +57,7 @@ const StatsModal = ({
               <Card size="small">
                 <Statistic
                   title="Успешных"
-                  value={serviceStats.successful_today}
+                  value={providerStats.successfulToday}
                   prefix={<CheckCircleOutlined />}
                   valueStyle={{ color: '#52c41a' }}
                 />
@@ -67,7 +67,7 @@ const StatsModal = ({
               <Card size="small">
                 <Statistic
                   title="Ошибок"
-                  value={serviceStats.failed_today}
+                  value={providerStats.failedToday}
                   prefix={<CloseCircleOutlined />}
                   valueStyle={{ color: '#ff4d4f' }}
                 />
@@ -77,15 +77,15 @@ const StatsModal = ({
 
           <Card title="Использование лимитов" size="small">
             <Space direction="vertical" style={{ width: '100%' }}>
-              {Object.entries(serviceStats.utilization_percent || {}).map(([key, percent]) => (
+              {Object.entries(providerStats.utilizationPercent || {}).map(([key, percent]) => (
                 <div key={key}>
                   <span>{key.charAt(0).toUpperCase() + key.slice(1)} лимит:</span>
                   <Progress 
                     percent={Math.round(percent)}
                     status={percent > 80 ? 'exception' : 'normal'}
                     format={() => {
-                      const counter = serviceStats[`${key}_counter`];
-                      const limit = serviceStats[`${key}_limit`];
+                      const counter = providerStats[`${key}Counter`];
+                      const limit = providerStats[`${key}Limit`];
                       return `${counter}/${limit}`;
                     }}
                   />
@@ -97,11 +97,11 @@ const StatsModal = ({
           <Card title="Общая информация" size="small" style={{ marginTop: '16px' }}>
             <Descriptions column={2} size="small">
               <Descriptions.Item label="Среднее время ответа">
-                {serviceStats.avg_response_time ? 
-                  `${serviceStats.avg_response_time.toFixed(2)}с` : 'N/A'}
+                {providerStats.avgResponseTime ? 
+                  `${providerStats.avgResponseTime.toFixed(2)}с` : 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="В очереди">
-                {serviceStats.pending_in_queue} запросов
+                {providerStats.pendingInQueue} запросов
               </Descriptions.Item>
             </Descriptions>
           </Card>
@@ -110,7 +110,7 @@ const StatsModal = ({
             <Button
               type="primary"
               icon={<ReloadOutlined />}
-              onClick={() => onResetCounters(selectedService.id)}
+              onClick={() => onResetCounters(selectedProvider.id)}
             >
               Сбросить все счетчики
             </Button>
@@ -118,7 +118,7 @@ const StatsModal = ({
         </TabPane>
 
         <TabPane tab="История запросов" key="logs" icon={<HistoryOutlined />}>
-          {serviceLogs.length === 0 ? (
+          {providerLogs.length === 0 ? (
             <Alert
               message="Нет данных"
               description="За последние 24 часа не было запросов"
@@ -127,17 +127,17 @@ const StatsModal = ({
             />
           ) : (
             <Timeline>
-              {serviceLogs.map((log, index) => (
+              {providerLogs.map((log, index) => (
                 <Timeline.Item
                   key={log.id}
-                  color={log.was_successful ? "green" : "red"}
+                  color={log.wasSuccessful ? "green" : "red"}
                   dot={index === 0 ? <ClockCircleOutlined /> : null}
                 >
                   <Space direction="vertical" size={0}>
                     <div>
                       <strong>{log.endpoint}</strong>
-                      <Tag color={log.was_successful ? "success" : "error"} style={{ marginLeft: '8px' }}>
-                        {log.status_code || 'ERROR'}
+                      <Tag color={log.wasSuccessful ? "success" : "error"} style={{ marginLeft: '8px' }}>
+                        {log.statusCode || 'ERROR'}
                       </Tag>
                     </div>
                     <div>
@@ -145,12 +145,12 @@ const StatsModal = ({
                         {new Date(log.timestamp).toLocaleString()}
                       </span>
                       <Tag style={{ marginLeft: '8px', fontSize: '12px' }}>
-                        {log.response_time?.toFixed(2)}с
+                        {log.responseTime?.toFixed(2)}с
                       </Tag>
                     </div>
-                    {log.error_message && (
+                    {log.errorMessage && (
                       <Alert
-                        message={log.error_message}
+                        message={log.errorMessage}
                         type="error"
                         size="small"
                         style={{ marginTop: '4px' }}
@@ -166,13 +166,13 @@ const StatsModal = ({
         <TabPane tab="Информация" key="info" icon={<SafetyOutlined />}>
           <Descriptions bordered column={1}>
             <Descriptions.Item label="Название">
-              {selectedService.name}
+              {selectedProvider.name}
             </Descriptions.Item>
             <Descriptions.Item label="Базовый URL">
-              {selectedService.base_url}
+              {selectedProvider.baseUrl}
             </Descriptions.Item>
             <Descriptions.Item label="API Ключ">
-              {selectedService.api_key ? (
+              {selectedProvider.apiKey ? (
                 <Tag color="green" icon={<KeyOutlined />}>
                   Настроен
                 </Tag>
@@ -181,19 +181,19 @@ const StatsModal = ({
               )}
             </Descriptions.Item>
             <Descriptions.Item label="Таймаут">
-              {selectedService.timeout} секунд
+              {selectedProvider.timeout} секунд
             </Descriptions.Item>
             <Descriptions.Item label="Задержка повтора">
-              {selectedService.retry_delay} секунд
+              {selectedProvider.retryDelay} секунд
             </Descriptions.Item>
             <Descriptions.Item label="Статус">
-              {getStatusTag(selectedService.is_active)}
+              {getStatusTag(selectedProvider.isActive)}
             </Descriptions.Item>
             <Descriptions.Item label="Создан">
-              {new Date(selectedService.created_at).toLocaleString()}
+              {new Date(selectedProvider.createdAt).toLocaleString()}
             </Descriptions.Item>
             <Descriptions.Item label="Обновлен">
-              {new Date(selectedService.updated_at).toLocaleString()}
+              {new Date(selectedProvider.updatedAt).toLocaleString()}
             </Descriptions.Item>
           </Descriptions>
         </TabPane>

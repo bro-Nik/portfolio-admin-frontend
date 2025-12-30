@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Tabs } from 'antd';
-import ServicesModule from '/app/src/modules/externalApi/services/ServicesModule';
+import ProvidersModule from './providers/ProvidersModule';
+import TasksModule from './tasks/TasksModule';
 
 const { TabPane } = Tabs;
 
 const ExternalApiPage = () => {
-  const [activeTab, setActiveTab] = useState('services');
+  const [activeTab, setActiveTab] = useState('providers');
 
   return (
     <div style={{ padding: '24px' }}>
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="API Сервисы" key="services"><ServicesModule /></TabPane>
+        <TabPane tab="API Провайдеры" key="providers"><ProvidersModule /></TabPane>
+        <TabPane tab="Задачи" key="tasks"><TasksModule /></TabPane>
       </Tabs>
     </div>
   );

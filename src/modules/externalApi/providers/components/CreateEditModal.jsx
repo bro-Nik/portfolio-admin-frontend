@@ -6,14 +6,14 @@ const { Option } = Select;
 
 const CreateEditModal = ({
   visible,
-  selectedService,
-  presets,
+  selectedProvider,
+  providers,
   onCancel,
   onCreate,
   onUpdate
 }) => {
   const [form] = Form.useForm();
-  const editMode = selectedService?.id;
+  const editMode = selectedProvider?.id;
 
   const initialValues = {
     requestsPerMinute: 30,
@@ -25,17 +25,16 @@ const CreateEditModal = ({
     isActive: true
   };
 
-  const loadPreset = (presetName) => {
-    const preset = presets.find(p => p.name === presetName);
-    if (preset) {
+  const loadPreset = (providerName) => {
+    const provider = providers.find(p => p.name === providerName);
+    if (provider) {
       form.setFieldsValue({
-        name: preset.name,
-        baseUrl: preset.baseUrl,
-        requestsPerMinute: preset.requestsPerMinute,
-        requestsPerHour: preset.requestsPerHour,
-        requestsPerDay: preset.requestsPerDay,
-        requestsPerMonth: preset.requestsPerMonth,
-        timeout: preset.timeout,
+        name: provider.name,
+        requestsPerMinute: provider.requestsPerMinute,
+        requestsPerHour: provider.requestsPerHour,
+        requestsPerDay: provider.requestsPerDay,
+        requestsPerMonth: provider.requestsPerMonth,
+        timeout: provider.timeout,
         retryDelay: 60,
         isActive: true
       });
@@ -43,8 +42,8 @@ const CreateEditModal = ({
   };
 
   const handleSubmit = (values) => {
-    if (editMode && selectedService) {
-      onUpdate(selectedService.id, values);
+    if (editMode && selectedProvider) {
+      onUpdate(selectedProvider.id, values);
     } else {
       onCreate(values);
     }
@@ -52,7 +51,7 @@ const CreateEditModal = ({
 
   return (
     <Modal
-      title={editMode ? 'Редактировать API сервис' : 'Создать новый API сервис'}
+      title={editMode ? 'Редактировать API провайдера' : 'Создать новый API провайдер'}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -63,57 +62,24 @@ const CreateEditModal = ({
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={editMode ? { ...selectedService, apiKey: selectedService?.apiKey ? '***' : '' } : initialValues}
+        initialValues={editMode ? { ...selectedProvider, apiKey: selectedProvider?.apiKey ? '***' : '' } : initialValues}
       >
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Название сервиса"
-              name="name"
-              rules={[
-                { required: true, message: 'Введите название' },
-                { pattern: /^[a-zA-Z0-9_-]+$/, message: 'Только буквы, цифры, _ и -' }
-              ]}
-            >
-              <Input 
-                placeholder="coingecko, binance, etc" 
-                disabled={editMode}
-                prefix={<ApiOutlined />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Пресеты"
-              help="Выберите предустановку для популярных сервисов"
-            >
-              <Select
-                placeholder="Выберите пресет"
-                onChange={loadPreset}
-                allowClear
-              >
-                {presets.map(preset => (
-                  <Option key={preset.name} value={preset.name}>
-                    {preset.displayName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
         <Form.Item
-          label="Базовый URL"
-          name="baseUrl"
-          rules={[
-            { required: true, message: 'Введите URL' },
-            { type: 'url', message: 'Введите корректный URL' }
-          ]}
+          label="Провайдер"
+          rules={[{ required: true, message: 'Введите провайдера' }]}
         >
-          <Input 
-            placeholder="https://api.example.com/v1" 
-            prefix={<LinkOutlined />}
-          />
+          <Select
+            placeholder="Выберите провайдера"
+            onChange={loadPreset}
+            prefix={<ApiOutlined />}
+            allowClear
+          >
+            {providers.map(provider => (
+              <Option key={provider.name} value={provider.name}>
+                {provider.displayName}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item

@@ -90,14 +90,14 @@ export const columns = (handlers) => [
           <Button
             size="small"
             icon={<EyeOutlined />}
-            onClick={() => handlers.showServiceDetails(record)}
+            onClick={() => handlers.showProviderDetails(record)}
           />
         </Tooltip>
         <Tooltip title="Редактировать">
           <Button
             size="small"
             icon={<EditOutlined />}
-            onClick={() => handlers.handleEditService(record)}
+            onClick={() => handlers.handleEditProvider(record)}
           />
         </Tooltip>
         <Tooltip title="Сбросить счетчики">
@@ -108,9 +108,9 @@ export const columns = (handlers) => [
           />
         </Tooltip>
         <Popconfirm
-          title="Удалить API сервис?"
-          description="Все задачи, использующие этот сервис, будут остановлены"
-          onConfirm={() => handlers.handleDeleteService(record.id)}
+          title="Удалить API провайдера?"
+          description="Все задачи, использующие этот провайдер, будут остановлены"
+          onConfirm={() => handlers.handleDeleteProvider(record.id)}
           okText="Да"
           cancelText="Нет"
         >
